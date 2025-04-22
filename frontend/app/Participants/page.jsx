@@ -5,14 +5,14 @@ import io from "socket.io-client";
 import { FaTrophy } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-const socket = io("http://localhost:5000");
+const socket = io(`${process.env.NEXT_NEXT_PUBLIC_API_URL}`);
 
 export default function ParticipantPage() {
   const [teams, setTeams] = useState([]);
   const listRef = useRef(null);
   const router = useRouter();
   useEffect(() => {
-    fetch("http://localhost:5000/teams")
+    fetch(`${process.env.NEXT_NEXT_PUBLIC_API_URL}/teams`)
       .then((res) => res.json())
       .then((data) => setTeams(data.sort((a, b) => b.score - a.score)));
 

@@ -19,40 +19,63 @@ export default function HackathonClock() {
     }
   }, []);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      router.push("/Participants");
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, [router]);
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     router.push("/Participants");
+  //   }, 3000);
+  //   return () => clearTimeout(timer);
+  // }, [router]);
 
-  const startClock = (existingTime = 0) => {
-    setRunning(true);
-    const startTime = existingTime || Date.now();
-    localStorage.setItem("hackathonStartTime", startTime);
-
+  const startCountdown = (startTime) => {
+    const END_TIME = startTime + 86400 * 1000; // 24 hours from startTime
+  
     timerRef.current = setInterval(() => {
-      const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-
-      if (elapsedSeconds >= 86400) {
+      const now = Date.now();
+      const remainingSeconds = Math.floor((END_TIME - now) / 1000);
+  
+      if (remainingSeconds <= 0) {
         clearInterval(timerRef.current);
         setTime("00:00:00");
         setMessage("Hackathon Over! 🎉");
         localStorage.removeItem("hackathonStartTime");
-      } else {
-        const hours = String(Math.floor(elapsedSeconds / 3600)).padStart(2, "0");
-        const minutes = String(Math.floor((elapsedSeconds % 3600) / 60)).padStart(2, "0");
-        const secs = String(elapsedSeconds % 60).padStart(2, "0");
-        setTime(`${hours}:${minutes}:${secs}`);
-
-        if (elapsedSeconds >= 79200) setMessage("Only 2 hours left!");
-        else if (elapsedSeconds >= 64800) setMessage("Final 6 hours! Stay strong!");
-        else if (elapsedSeconds >= 43200) setMessage("Halfway through! Keep going!");
-        else if (elapsedSeconds >= 21600) setMessage("6 hours done! Time flies!");
-        else setMessage("Hackathon is live! Let's GO!");
+        return;
       }
+  
+      const hours = String(Math.floor(remainingSeconds / 3600)).padStart(2, "0");
+      const minutes = String(Math.floor((remainingSeconds % 3600) / 60)).padStart(2, "0");
+      const secs = String(remainingSeconds % 60).padStart(2, "0");
+      setTime(`${hours}:${minutes}:${secs}`);
+  
+      if (remainingSeconds <= 7200) setMessage("Only 2 hours left!");
+      else if (remainingSeconds <= 21600) setMessage("Final 6 hours! Stay strong!");
+      else if (remainingSeconds <= 43200) setMessage("Halfway through! Keep going!");
+      else if (remainingSeconds <= 64800) setMessage("6 hours done! Time flies!");
+      else setMessage("Hackathon is live! Let's GO!");
     }, 1000);
   };
+  
+
+  useEffect(() => {
+    const targetDate = new Date("2025-04-22T09:30:00");
+  
+    const checkAndStart = () => {
+      const now = new Date();
+  
+      if (now >= targetDate && !running) {
+        const startTime = targetDate.getTime();
+        localStorage.setItem("hackathonStartTime", startTime.toString());
+        startCountdown(startTime);
+        setRunning(true);
+      }
+    };
+  
+    // Check immediately and then every second
+    checkAndStart();
+    const intervalId = setInterval(checkAndStart, 1000);
+  
+    return () => clearInterval(intervalId);
+  }, []);
+  
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] animate-gradient text-white font-sans">
@@ -86,7 +109,7 @@ export default function HackathonClock() {
       >
         {message}
       </motion.p>
-
+{/* 
       {!running && (
         <motion.button
           onClick={startClock}
@@ -96,7 +119,7 @@ export default function HackathonClock() {
         >
           Start Clock
         </motion.button>
-      )}
+      )} */}
 
       <style jsx>{`
         .animate-gradient {

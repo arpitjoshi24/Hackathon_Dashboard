@@ -10,18 +10,37 @@ const server = http.createServer(app);
 const io = socketIo(server, { cors: { origin: "*" } });
 
 app.use(express.json());
-app.use(cors());
+// Get allowed origins from env and convert to array
+const allowedOrigins = process.env.ALLOWED_URL?.split(',') || [];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+};
+
+app.use(cors(corsOptions));
 
 // ✅ Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-});
+}).then(() => console.log("Connected to MongoDB")).catch((err) => console.error(err));
 
 // ✅ Team Model
 const Team = mongoose.model("Team", {
   name: String,
   score: Number,
+});
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
 });
 
 // ✅ Get All Teams (Sorted by Score)
@@ -87,13 +106,28 @@ app.delete("/delete-team/:id", async (req, res) => {
     }
 });
 
-  
+function ackServer() {
+  // Use full URL from env or default to localhost with server port
+  const url = process.env.MY_URL || `http://localhost:${process.env.PORT || 5000}/`;
+  console.log(`Starting ACK heartbeat: GET ${url} every 25s`);
+
+  setInterval(async () => {
+    try {
+      const response = await axios.get(url);
+      console.log(`[ACK] ${new Date().toISOString()} →`, response.status);
+    } catch (err) {
+      console.error(`[ACK ERROR] ${new Date().toISOString()} →`, err.message);
+    }
+  }, 25_000);
+}
 
 // ✅ Socket Connection
 io.on("connection", (socket) => {
   console.log("Client connected");
   socket.on("disconnect", () => console.log("Client disconnected"));
 });
+
+ackServer();
 
 // ✅ Start Server
 server.listen(5000, () => console.log("Backend running on port 5000"));
