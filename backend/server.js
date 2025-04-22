@@ -12,21 +12,10 @@ const io = socketIo(server, { cors: { origin: "*" } });
 
 app.use(express.json());
 // Get allowed origins from env and convert to array
-const allowedOrigins = process.env.ALLOWED_URL?.split(',') || [];
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  }
-};
-
-app.use(cors(corsOptions));
+app.use(cors({
+  origin: "*"
+}));
 
 // ✅ Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
