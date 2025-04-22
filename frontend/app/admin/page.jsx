@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import io from "socket.io-client";
 
-const socket = io(`${process.env.NEXT_NEXT_PUBLIC_API_URL}`);
+const socket = io(`${process.env.NEXT_PUBLIC_API_URL}`);
 
 export default function AdminPage() {
   const [teams, setTeams] = useState([]);
@@ -12,7 +12,7 @@ export default function AdminPage() {
   const [teamScores, setTeamScores] = useState({});
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_NEXT_PUBLIC_API_URL}/teams`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/teams`)
       .then((res) => res.json())
       .then((data) => setTeams(data));
 
@@ -36,7 +36,7 @@ export default function AdminPage() {
 
   const registerTeam = async (e) => {
     e.preventDefault();
-    const res = await fetch(`${process.env.NEXT_NEXT_PUBLIC_API_URL}/register-team`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register-team`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: teamName }),
@@ -48,7 +48,7 @@ export default function AdminPage() {
     const score = parseInt(teamScores[teamId], 10);
     if (isNaN(score)) return alert("Please enter a valid number");
 
-    const res = await fetch(`${process.env.NEXT_NEXT_PUBLIC_API_URL}/update-score`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/update-score`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ teamId, score: change === "increase" ? score : -score }),
@@ -58,7 +58,7 @@ export default function AdminPage() {
   };
 
   const deleteTeam = async (teamId) => {
-    const res = await fetch(`${process.env.NEXT_NEXT_PUBLIC_API_URL}/delete-team/${teamId}`, { // Ensure correct endpoint
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete-team/${teamId}`, { // Ensure correct endpoint
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });
