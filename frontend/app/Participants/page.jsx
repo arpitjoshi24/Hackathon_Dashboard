@@ -73,7 +73,7 @@ export default function ParticipantPage() {
   useEffect(() => {
     const timer = setTimeout(() => {
       router.push("/clock");
-    }, 10000);
+    }, 60000);
     return () => clearTimeout(timer);
   }, [router]);
 
@@ -130,7 +130,7 @@ export default function ParticipantPage() {
                     </span>
 
                     <div className="flex items-center justify-center gap-3">
-                      {medal && (
+                      {medal && team.score > 0 && (
                         <FaTrophy
                           className={`text-2xl ${
                             medal === "gold"
